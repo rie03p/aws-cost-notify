@@ -1,0 +1,71 @@
+{
+  "name": "AWS Cost Notify",
+  "dockerComposeFile": "compose.yaml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/aws-cost-notify",
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "upgradePackages": true
+    }
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // JavaScript & TypeScript
+        "yoavbls.pretty-ts-errors",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        // Shell
+        "foxundermoon.shell-format",
+        "timonwong.shellcheck",
+        // Utility
+        "dotenv.dotenv-vscode",
+        "eamodio.gitlens",
+        "github.copilot",
+        "gruntfuggly.todo-tree",
+        "streetsidesoftware.code-spell-checker",
+        "mhutchie.git-graph",
+        "oderwat.indent-rainbow",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        // Shell
+        "shellformat.flag": "-s",
+        "shellformat.path": "/usr/local/bin/shfmt",
+        "[shellscript]": {
+          "editor.defaultFormatter": "foxundermoon.shell-format"
+        },
+        // JavaScript & TypeScript
+        "eslint.workingDirectories": [
+          {
+            "mode": "auto"
+          }
+        ],
+        "[javascript][typescript]": {
+          "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+          },
+          "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+          "editor.formatOnSave": true
+        },
+        "eslint.format.enable": true,
+        // Terminal
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.scrollback": 100000,
+        // GitHub Copilot
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.chat.localeOverride": "ja",
+        "chat.instructionsFilesLocations": {
+          ".github/instructions": true
+        }
+      }
+    }
+  }
+}

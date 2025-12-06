@@ -1,0 +1,10 @@
+services:
+  devcontainer:
+    build: .
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: ..
+        target: /workspaces/aws-cost-notify
+        consistency: cached
+    init: true
