@@ -12,6 +12,7 @@ mise install -y
 eval "$(mise activate zsh)"
 
 npm install -g aws-cdk
+cargo install cargo-lambda
 
 cat <<'EOF' >> ~/.zshrc
 export AWS_DEFAULT_PROFILE='manage'
