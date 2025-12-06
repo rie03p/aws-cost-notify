@@ -10,7 +10,13 @@ fi
 mise trust
 mise install -y
 eval "$(mise activate zsh)"
-eval "$(mise hook-env)"
 
 npm install -g aws-cdk
 
+cat <<'EOF' >> ~/.zshrc
+export AWS_DEFAULT_PROFILE='manage'
+
+complete -C '/usr/local/bin/aws_completer' aws
+EOF
+
+source ~/.zshrc

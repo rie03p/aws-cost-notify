@@ -8,13 +8,13 @@
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers-extra/features/mise:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "installOhMyZsh": true,
-      "installOhMyZshConfig": true,
       "upgradePackages": true
     }
   },
   "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -24,7 +24,6 @@
         "dbaeumer.vscode-eslint",
         // Shell
         "foxundermoon.shell-format",
-        "timonwong.shellcheck",
         // Utility
         "dotenv.dotenv-vscode",
         "eamodio.gitlens",
