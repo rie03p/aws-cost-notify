@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+aws-config = { version = "1.5", features = ["rustls"] }
+aws-sdk-costexplorer = { version = "1.57", features = ["rustls"] }
 aws_lambda_events = { version = "1.0.0", default-features = false, features = ["eventbridge"] }
-
+chrono = "0.4"
 lambda_runtime = "1.0.1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 tokio = { version = "1", features = ["macros"] }
