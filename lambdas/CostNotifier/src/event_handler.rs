@@ -5,6 +5,7 @@ use lambda_runtime::{tracing, Error, LambdaEvent};
 use aws_lambda_events::event::eventbridge::EventBridgeEvent;
 use serde::Serialize;
 use std::env;
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 struct DiscordEmbed {
@@ -36,7 +37,13 @@ pub(crate) async fn function_handler(event: LambdaEvent<EventBridgeEvent>) -> Re
         .map_err(|_| "DISCORD_WEBHOOK_URL environment variable not set")?;
 
     // AWS Cost Explorer クライアントを初期化
-    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    let region_provider = aws_config::meta::region::RegionProviderChain::first_try("us-east-1");
+
+    let config = aws_config::from_env()
+        .region(region_provider)
+        .load()
+        .await;
+
     let client = CostExplorerClient::new(&config);
 
     // 日付範囲を設定 (過去7日間)
@@ -65,19 +72,17 @@ pub(crate) async fn function_handler(event: LambdaEvent<EventBridgeEvent>) -> Re
         .await
         .map_err(|e| format!("Failed to get cost and usage: {}", e))?;
 
-    // コストデータを整形
-    let mut fields = Vec::new();
-    let mut total_cost = 0.0;
+    // コストデータを整形（アカウントごとに合計）
+    let mut account_costs: HashMap<String, f64> = HashMap::new();
 
-    // results_by_time は &[ResultByTime] を返す
     for result in response.results_by_time() {
-        // groups も &[Group] を返す
         for group in result.groups() {
             let account_id = group
                 .keys()
                 .first()
                 .map(|s| s.as_str())
-                .unwrap_or("Unknown");
+                .unwrap_or("Unknown")
+                .to_string();
 
             let cost = group
                 .metrics()
@@ -86,17 +91,26 @@ pub(crate) async fn function_handler(event: LambdaEvent<EventBridgeEvent>) -> Re
                 .and_then(|amount| amount.parse::<f64>().ok())
                 .unwrap_or(0.0);
 
-            if cost > 0.01 {
-                fields.push(DiscordField {
-                    name: format!("Account: {}", account_id),
-                    value: format!("${:.2}", cost),
-                    inline: true,
-                });
-                total_cost += cost;
-            }
+            // ★ アカウントごとに加算
+            *account_costs.entry(account_id).or_insert(0.0) += cost;
         }
     }
-    
+
+    // Discord の fields に変換
+    let mut fields = Vec::new();
+    let mut total_cost = 0.0;
+
+    for (account_id, cost) in account_costs.iter() {
+        if *cost > 0.01 {
+            fields.push(DiscordField {
+                name: format!("Account: {}", account_id),
+                value: format!("${:.2}", cost),
+                inline: true,
+            });
+            total_cost += cost;
+        }
+    }
+
     // 合計を追加
     fields.push(DiscordField {
         name: "**Total**".to_string(),
@@ -134,7 +148,6 @@ pub(crate) async fn function_handler(event: LambdaEvent<EventBridgeEvent>) -> Re
         return Err(format!("Discord webhook failed with status {}: {}", status, body).into());
     }
 
-    tracing::info!("Successfully sent cost notification to Discord");
     Ok(())
 }
 
